@@ -6,6 +6,11 @@ const helmet = require('helmet');
 
 const app = express();
 
+const config = {
+        CLIENT_ID: '191053543880-2dtgrtpjrrouagqfefn3kup61fsm4kp7.apps.googleusercontent.com',
+        CLIENT_SECRET: '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'
+}
+
 app.use(helmet());
 
 function checkLoggedIn(req, res, next) {
