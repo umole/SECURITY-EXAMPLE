@@ -1,7 +1,12 @@
-const express = require('express');
+const fs = require('fs')
 const path = require('path');
+const http = require('http');
+const express = require('express');
+const helmet = require('helmet');
 
 const app = express();
+
+app.use(helmet());
 
 //set up a route to listen to the request 
 app.get('/', (req, res) => {
@@ -13,6 +18,9 @@ app.get('/secret', (req, res) => {
 })
 
 const PORT = 3000;
-app.listen(PORT, () => {
+http.createServer({
+    key: '',
+    cert: '',
+}).listen(PORT, () => {
     console.log(`Listening on PORT: ${PORT}`);
 });
