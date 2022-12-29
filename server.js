@@ -4,15 +4,18 @@ const http = require('http');
 const express = require('express');
 const helmet = require('helmet');
 const passport = require('passport');
-const { Strategy } = require('passport-google-oauth20')
+const { Strategy } = require('passport-google-oauth20');
+const cookieSession = require('cookie-session');
 require('dotenv').config();
 
 const app = express();
 
 const config = {
         CLIENT_ID: process.env.CLIENT_ID,
-        CLIENT_SECRET: process.env.CLIENT_SECRET
-}
+        CLIENT_SECRET: process.env.CLIENT_SECRET,
+        COOKIE_KEY_1: process.env.COOKIE_KEY_1,
+        COOKIE_KEY_2: process.env.COOKIE_KEY_2,
+};
 
 const AUTH_OPTIONS = {
     callbackURL: '/auth/google/callback',
@@ -27,8 +30,27 @@ function verifyCallBack(accessToken, refreshToken, profile, done) {
 
 passport.use(new Strategy(AUTH_OPTIONS, verifyCallBack));
 
+//When we save the session to the cookie
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+//When we read or load the session from the cookie
+passport.deserializeUser((id, done) => {
+    // user.findBuId(id).then(user => {
+    //     done(null, obj);
+    // }) //req.user
+    done(null, id);
+});
+
 app.use(helmet());
-app.use(passport.initialize())
+app.use(cookieSession({
+    name: 'Session',
+    maxAge: 1000 * 60 * 60 * 24,
+    keys: [config.COOKIE_KEY_1, config.COOKIE_KEY_2],
+}))
+app.use(passport.initialize());
+app.use(passport.session());
 
 function checkLoggedIn(req, res, next) {
     const isLoggedin = true; //TODO
@@ -42,7 +64,8 @@ function checkLoggedIn(req, res, next) {
 
 app.get('/auth/google/', 
     passport.authenticate('google', {
-        scope: ['email']
+        scope: ['email'],
+        callbackURL: '/auth/google/callback'
     })
 );
 
@@ -50,7 +73,7 @@ app.get('/auth/google/callback',
     passport.authenticate('google', {
         failureRedirect: '/failure',
         successRedirect: '/',
-        session: false,
+        session: true,
     }),
     (req, res) => {
     console.log('Google called!')
