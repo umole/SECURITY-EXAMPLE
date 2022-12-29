@@ -73,9 +73,6 @@ app.get('/', (req, res) => {
 });
 
 const PORT = 3000;
-http.createServer({
-    key: '',
-    cert: '',
-}).listen(PORT, () => {
+app.listen(PORT, () => {
     console.log(`Listening on PORT: ${PORT}`);
 });
